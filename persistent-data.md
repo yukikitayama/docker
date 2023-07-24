@@ -26,4 +26,23 @@ Friendly way to assign volumes to containers.
 
 `docker volume inspect <volume-name>`
 
+
 ## Bind mount
+
+Maps a host file or directory to a container file or directory to make two locations point to the same files.
+
+Host files overwrite anything in container.
+
+You cannot specify in Dockerfile, must be at `container run` by `... run -v //c/Users/somthing:/path/container` (Windows)
+
+
+
+Working directory
+
+In Windows command prompt, `%cd%`
+
+In Windows PowerShell, `${pwd}`
+
+In Linux, `$(pwd)`
+
+

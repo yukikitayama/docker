@@ -8,7 +8,7 @@
 
 To connect to a shell inside of a container, we don't need ssh.
 
-Use `docker exec -it <container-name> sh (or bash)` command to execute a shell inside of a container.
+Use `docker container exec -it <container-name> sh (or bash)` command to execute a shell inside of a container.
 
 `--rm` flag means automatically remove the container when it exists.
 
