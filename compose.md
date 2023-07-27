@@ -18,8 +18,17 @@ Docker direction used in production with Swarm
 
 `docker compose up` sets up volumes, networks and start all containers
 
-`docker compose down` stops all containers and removes containers, volumes and networks.
- 
 If a project has `Dockerfile` and `docker-compose.yml`, we should do `git clone github.com/repo` and `docker compose up`
 
+## Cleanup
+
+`docker compose down` stops all containers and removes containers, volumes and networks.
+
+`docker compose down -v` removes volumes as well. Be default, Docker protests volumes.
+
+## Build
+
+`docker compose down --rmi local` deletes images too
+
+`build context` in a compose file is meant to specify where the Dockerfile of the image is supposed to build from.
 

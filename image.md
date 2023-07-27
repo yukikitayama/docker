@@ -68,6 +68,13 @@ Use `#` to comment.
 `CMD` is a required parameter. But if you omit, it inherits the `CMD` of the base image but it's not explicit, so good
 practice is always to specify `CMD` at the bottom of `Dockerfile`.
 
+Multiline with \ and `&&`
+
+```
+RUN apt-get update && apt-get install -y git \
+    && do other things
+```
+
 ## Build
 
 `docker build -t <tag> .` `.` means build an image in this directory.
