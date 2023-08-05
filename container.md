@@ -12,3 +12,6 @@ Use `docker container exec -it <container-name> sh (or bash)` command to execute
 
 `--rm` flag means automatically remove the container when it exists.
 
+Typically Docker containers are not built to accept additional parameters when launching 
+
+`docker rm` removes one or more containers, while `docker rmi` removes one or more images.

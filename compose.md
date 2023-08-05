@@ -32,3 +32,8 @@ If a project has `Dockerfile` and `docker-compose.yml`, we should do `git clone 
 
 `build context` in a compose file is meant to specify where the Dockerfile of the image is supposed to build from.
 
+## Scale
+
+To scale an app,
+- Change the replicas value in `docker-compose.yml`
+- Execute `docker stack deploy`
