@@ -109,5 +109,21 @@ the container.
 
 ## Deployment
 
+## Storage
+
+**PersistentVolume** is storage in the cluster provisioned by an administrator, cannot be provisioned on-demand.
+
+But **dynamic volume provisioning** allows storage volumes to be created on-demand, so it eliminates the need for 
+cluster administrators to pre-provision storage.
+
+Cluster users create **PersistentVolumeClaim** for suitable PersistentVolume. The users create a Pod that uses the
+PersistentVolumeClaim as storage.
+
+PersistentVolumeClaim to PersistentVolume binding is a **one-to-one mapping**, using ClaimRef which is a bi-directional
+binding between PV and PVC.
+
+**Device mapper** is a kernel-based framework for many advanced volume management technologies on Linux.
+- **direct-lvm** is a kind of device mapper we should configure when installing Docker for **production** workloads
+- **loop-lvm** is a kind of device mapper for testing
 
 

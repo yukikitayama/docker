@@ -86,9 +86,16 @@ ARG CODE_VERSIONS=latest
 FROM base:${CODE_VERSION}
 ```
 
-`ARG` defines a variable by `docker build --build-arg <key>=<value>`. `ARG` variables are not persisted into the image.
+`FROM` 
+- can appear multiple times in Dockerfile to create multiple images or use one build stage as a dependency for another.
+- Each `FROM` clears any state created by previous instructions.
 
-`RUN` executes any commands in a new layer on top of the current image and commits the results.
+`ARG` defines a variable by `docker build --build-arg <key>=<value>`. `ARG` variables are not persisted into the image.
+But the variables by `ARG` are available to `RUN` instruction.
+
+`RUN` 
+- executes any commands in a new layer on top of the current image and commits the results.
+- Runs at build time
 
 `ADD` additionally support the following as well as copying files and directories like `COPY` but should use `COPY`
 - Fetch remote source files if a URL is specified
@@ -107,18 +114,41 @@ FROM base:${CODE_VERSION}
 - WORKDIR can resolve ENV environment variables previously set
 - It impacts containers as well as build
 
-`CMD`
-
-Container execution default
-
 `ENV`
 - Environment variables available for the subsequent instructions in the build stage
 - Environment variables persist when a container is run from the image.
+- Can override the environment variables that `ARG` defines in the same name.
 
 `HEALTHCHECK`
 - Tells Docker how to test a container to check if it's working.
 - `HEALTHCHECK CMD` checks container health by running command inside the container.
 - `HEALTHCHECK CMD curl localhost:8080` adds health status to detect a web server that is stuck in infinite loop
+
+`VOLUME`
+- Create a mount point with the specified name
+- Mark it as holding externally mounted volumes from host or other containers
+
+`ENTRYPOINT`
+- parameters are not ignored when Docker container runs with command line parameters
+- Configure a container that will run as an executable.
+- When `ENTRYPOINT` and `CMD` are used together, `CMD` section will be appended to `ENTRYPOINT`
+```
+ENTRYPOINT ["python"]
+CMD ["app.py"]
+
+is equivalent to
+
+ENTRYPOINT ["python", "app.py"]
+```
+
+`CMD`
+- If Docker container runs with a command, the `CMD` default command will be ignored
+- If more than one CMDs, all but last CMD are ignored.
+- Default command if container is executed without specifying a command.
+- Doesn't execute anything at build time
+
+`LABEL`
+- Adds metadata by `LABEL <key>=<value>`
 
 ## Environment variable
 
@@ -139,6 +169,31 @@ Docker daemon.
 It is not a good practice to use the root directory `/` of your local machine as the PATH for building the docker image. It causes the build
 to transfer the entire contents of your hard drive to the Docker daemon.
 
+**Multi-stage build** uses multiple `FROM`s, each `FROM` can use a different base, each begins new stage of build, 
+copy artifacts from one stage to another, and leave behind anything no need in the final image.
+
+## Dangling
+
+Untagged images are called dangling images, and are not referenced by any container
+
+`docker images --filter "dangling=true"` shows untagged images
+
+`docker image prune` removes dangling images.
+
+## Sign
+
+UCP, Universal Control Plane
+
+To sign images in a way that UCP trusts them
+- Configure your Notary client
+- Initialize trust metadata for the repository
+- Delegate signing to the keys in your UCP client bundle
+
+DCT, Docker Content Trust.
+
+DCT allows you to verify the authenticity, integrity and publication date of Docker images in Docker Hub Registry.
+By default, content trust is disabled, but `export DOCKER_CONTENT_TRUST=1` enables it.
+
 ## Alpine
 
 Alpine is distribution of Linux, very very small.
@@ -148,3 +203,8 @@ Alpine is distribution of Linux, very very small.
 `docker save` saves the image as a TAR file and copy it over to the target host. Then use `docker load` to un-TAR the
 image back as a docker image. So the archive can be distributed by file server, version control system, email or flash
 drive.
+
+## Search image
+
+`docker search --filter is-official=true --filter stars=30 ubuntu` means to search for a Ubuntu official Docker image
+with a minimum rating of 30 stars.
