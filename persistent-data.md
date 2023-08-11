@@ -100,6 +100,13 @@ devicemapper driver uses block devices for Docker, operating at block level, not
 
 If we need to use multiple block devices, configure `direct-lvm` mode manually.
 
+**Device mapper** is a kernel-based framework for many advanced volume management technologies on Linux.
+- **direct-lvm** is a kind of device mapper we should configure when installing Docker for **production** workloads
+- **loop-lvm** is a kind of device mapper for testing
+
+To configure a production-ready devicemapper configuration, use `--storage-opt dm.directlvm_device` Docker daemon option,
+specifying a block device.
+
 ## docker diff
 
 `docker diff <container>` lists the changes to files or directories on a container's filesystem with following symbols.

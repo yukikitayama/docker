@@ -122,8 +122,7 @@ PersistentVolumeClaim as storage.
 PersistentVolumeClaim to PersistentVolume binding is a **one-to-one mapping**, using ClaimRef which is a bi-directional
 binding between PV and PVC.
 
-**Device mapper** is a kernel-based framework for many advanced volume management technologies on Linux.
-- **direct-lvm** is a kind of device mapper we should configure when installing Docker for **production** workloads
-- **loop-lvm** is a kind of device mapper for testing
 
+PersistentVolumeClaim will remain unbound indefinitely if a matching volume doesn't exist and the claim can't be 
+satisfied. Claims will be bound as matching volumes become available.
 

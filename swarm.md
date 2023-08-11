@@ -33,6 +33,18 @@ idea.
 
 `docker service inspect --pretty` to make output in a human-readable format
 
+## docker service
+
+`docker run` is a single host solution. `docker service` is equivalent to `run` in swarm.
+
+`docker service ls` to list services
+
+`docker service ps <service-name>` shows actual tasks or containers for that service.
+
+`docker service update` updates without taking down the services
+
+`docker service rm <service-name>` to take down the service
+
 ## Manager
 
 There is no limit on the number of manager nodes.
@@ -48,6 +60,8 @@ Determines on which node a task will be scheduled. We submit a service definitio
 units of work called tasks to worker nodes. This is how an application is deployed to a swarm.
 
 ## Raft consensus algorithm
+
+Raft is the protocol that ensures consistency across multiple nodes.
 
 It's the algorithm that manager nodes implement to manage the global cluster state when the Docker Engine runs in swarm mode.
 
