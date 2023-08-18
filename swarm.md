@@ -33,9 +33,21 @@ idea.
 
 `docker service inspect --pretty` to make output in a human-readable format
 
+`docker swarm join-token manager` to get a toke to add a new node to swarm
+
+## Networking
+
+**Overlay** is the swarm-wide bridge network driver where containers can communicate across nodes.
+
+Use `--driver overlay` in creating network for container-to-container traffic within a single Swarm
+
+Each service can be connected to multiple networks.
+
 ## docker service
 
 `docker run` is a single host solution. `docker service` is equivalent to `run` in swarm.
+
+`docker service create` creates a service
 
 `docker service ls` to list services
 
@@ -53,6 +65,12 @@ Adding manager nodes to a swarm makes the swarm more fault-tolerant.
 
 Additional manager nodes reduce the write performance, because more nodes must acknowledge proposals to update the swarm
 state.
+
+Run `docker swarm join-token worker` on a manager node, to retrieve the join token for worker nodes
+
+## Worker
+
+Run `docker swarm join --token <token>` on a worker node to add a worker to the swarm
 
 ## Dispatcher
 
@@ -111,3 +129,78 @@ The services remain pending when
 - The amount of memory reserved for a service not satisfied
 - All nodes are paused or drained
 - Imposed placement constraints not honored (?)
+
+## Routing mesh
+
+Routes ingress (incoming) packets for a service to a proper task to **load balance** Swarm services across their tasks.
+
+Spans all nodes in Swarm
+
+Uses IPVS from Linux Kernel
+
+- Container-to-container in a **overlay** network using virtual IP VIP
+- External traffic incoming to published ports and all nodes listen to
+
+It's stateless load balancing, so if you need to use session cookies on your applications, or if it expects a consistent
+container to talk to, you may need to add other things to solve that problem.
+
+This load balancer is OSI Layer 3 (TCP), not Layer 4 (DNS).
+
+Docker Enterprise Edition comes with L4 web proxy.
+
+## Multiple nodes swarm cluster
+
+In play with docker, `ctrl + insert` to copy, `shift + insert` to paste
+https://github.com/play-with-docker/play-with-docker/issues/65
+
+Initialize swarm by `docker swarm init --advertise-addr <ip-address>` use IP address accessible from other servers.
+
+Copy swarm join command and go to other nodes
+
+`docker node update --role manager <node>` to assing manager
+
+`docker swarm join-toke manager` to retrieve token
+
+## Stack
+
+Production-grade `compose`, stacks of services.
+
+Stacks accept compose files as their declarative definition for services, networks, and volumes.
+
+Use `docker stack deploy` to create
+
+Use `deploy:` key in compose file, no `build:`, so compose ignores `deploy:` and swarm ignores `build:`
+
+`docker stack deploy -c <compose-file-name> <stack-name>` to create Swarm Stack
+
+`docker stack services <stack-name>` to see each service and replica and `docker stack ps <stack-name>` to deep dive for
+image name and node
+
+To update an existing stack, update compose YAML file and run again `docker stack deploy -c <compose-file-name> <stack-name>`
+
+## Secret storage
+
+Easiest secure solution for storing secrets in Swarm. Encrypted in disk and encrypted in transit. Doesn't require apps
+to be rewritten in order to use secret storage.
+
+Secrets are first stored in Swarm, then assigned to a service. Only containers in assigned services can see them.
+
+Secrets look like files in containers but are actually in-memory filesystem
+
+Secret examples
+- Username and password
+- TLS certificates and keys
+- SSH keys
+
+`docker secret create <secret-name> <file-name-containing-secret>`
+
+`echo "secret-value" | docker secret create <secret-name> -` to make secret in command, the last `-` is stdin.
+
+`docker secret ls` to see secret names. `docker secret inspect <secret-name>` can give us the details but don't give us
+the actual secret values.
+
+When you use secret in creating service with `docker service create`, use `--secret <secret-name>` to connect secret
+to a service and `/run/secrets/<secret-name>` to use the secret values.
+
+To remove secrets, use `docker service update --secret-rm`, but it redeploys containers.
+

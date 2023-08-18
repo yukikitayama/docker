@@ -41,6 +41,16 @@ creates the container inside it.
 
 **Namespace** is a filtered view in CLI, not security feature.
 
+## Service
+
+To find a service,
+- Environment variables
+- DNS (Common)
+
+## Calico
+
+The default network for Kubernetes by Universal Control Plane.
+
 ## Command line
 
 `kubectl version` to check whether it's working
