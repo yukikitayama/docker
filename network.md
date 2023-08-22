@@ -30,7 +30,7 @@ We can attach a container to more than one virtual network
 
 `docker network create <network-name>` create a network
 
-`docker network connect` attaches a network to a container
+`docker network connect <network-name> <container-name>` attaches a network to a container
 
 `docker network disconnect` detaches a network from a container
 
@@ -51,6 +51,9 @@ isolated from the Docker host. The container doesn't get its own IP address allo
 ## Ingress
 
 Overlay network to handle control and data traffic related to swarm services.
+
+Ingress is one of the types of overlay networks. It sits on top of the host-specific networks and handles control and
+data traffic related to swarm services.
 
 When you create a swarm service and do not connect it to a user-defined overlay network, it connects to the ingress network
 by default.
@@ -90,12 +93,22 @@ All swarm service management traffic is encrypted by default, but to encrypt app
 
 ## User-defined bridge network
 
-Best when you need multiple containers to communicate on the same Docker host.
+- Best when you need multiple containers to communicate on the same Docker host.
+- Provide automatic DNS resolution between containers
+- Provide better isolation
+- Containers can be attached and detached on the fly
+- Provide a scoped network in which only containers attached to that network are able to communicate
+- Can use **automatic service discover** which allows containers not only to communicate by IP address, but also to resolve
+  a container name to an IP address.
 
 ## Macvlan network
 
 Best when you are migrating from a VM setup or need your containers to look like physical hosts on your network, each
 with a unique MAC address.
+
+The modes that can create Macvlan networks
+- Bridge mode - Traffic goes through physical device on the host
+- 802.1q trunk bridge mode - Can control routing and filtering at a more granular level.
 
 ## Network scope
 
@@ -152,4 +165,13 @@ enabling the use of virtual networks.
 ## Service discovery
 
 Docker uses embedded DNS to provide service discovery
+
+## Container network model
+
+Container network model (CNM) is a standard proposed by Docker.
+
+- Sandbox - Isolated environment that contains the container's network configuration. Works as a networking stack within
+  the container
+- Endpoint - Joins a Sandbox to a network. 
+- Network - Uniquely identifiable collection of endpoints allowed to communicate with each other.
 

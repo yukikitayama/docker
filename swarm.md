@@ -35,6 +35,8 @@ idea.
 
 `docker swarm join-token manager` to get a toke to add a new node to swarm
 
+`10.0.0.0/8` is a default address pool that Docker Swarm uses by default for global scope networks.
+
 ## Networking
 
 **Overlay** is the swarm-wide bridge network driver where containers can communicate across nodes.
@@ -101,6 +103,36 @@ Raft requires a majority or quorum of `(N / 2) + 1`. For example, when we have a
 **Placement preference** try to place tasks on appropriate nodes in algorithmic way. `docker service update --placement-pref-add
 `
 
+## Service update
+
+Provides rolling replacement of tasks/containers in a service, limits downtime, will replace containers for most 
+changes, use `-add` or `-rm`, includes rollback and health check options
+
+For example,
+- `docker service update --env-add ENV=prod --publish-rm 8080` to add environment variable and to remove port
+- `docker service scale service-a=2 service-b=3` to change replicas
+
+## Docker healthchecks
+
+Docker engine will check a basic health status inside the container
+
+It expects exit 0 for OK or exit 1 for Error
+
+3 container states
+- starting
+- healthy
+- unhealthy
+
+`docker container ls` shows healthcheck status
+
+`docker container inspect` shows last 5 healthchecks
+
+`HEALTHCHECK --options` in Dockerfile
+
+Services will replace tasks if they fail healthcheck
+
+Service updates wait for them before continuing
+
 ## Replicated service vs. global service
 
 Swarm mode has 2 types of services; replicated and global. Control by `--mode`. Default is replicated service
@@ -129,6 +161,13 @@ The services remain pending when
 - The amount of memory reserved for a service not satisfied
 - All nodes are paused or drained
 - Imposed placement constraints not honored (?)
+
+## Service discovery
+
+The mechanism Docker uses to route a request from external client to an individual swarm node.
+
+- Virtual IP (VIP) with `--endpoint-mode vip`
+- DNS round-robin with `--endpoint-mode dnsrr`
 
 ## Routing mesh
 
@@ -203,4 +242,13 @@ When you use secret in creating service with `docker service create`, use `--sec
 to a service and `/run/secrets/<secret-name>` to use the secret values.
 
 To remove secrets, use `docker service update --secret-rm`, but it redeploys containers.
+
+## Network port
+
+In Swarm mode, the following ports need to be open to traffic to and from each Docker host participating on an overlay 
+network
+
+- **TCP port 2377** for cluster management communications
+- **TCP and UDP port 7946** for communication among nodes
+- **UDP port 4789** for overlay network traffic.
 

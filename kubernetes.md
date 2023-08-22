@@ -136,3 +136,13 @@ binding between PV and PVC.
 PersistentVolumeClaim will remain unbound indefinitely if a matching volume doesn't exist and the claim can't be 
 satisfied. Claims will be bound as matching volumes become available.
 
+## Network
+
+- ClusterIP
+  - Default method of exposing a service internally
+  - Services will receive a cluster-scoped Virtual IP address also known as ClusterIP.
+- NodePort
+  - Allow services to be accessed from outside the cluster
+- LoadBalancer
+  - Allow services to be accessed from outside the cluster
+
