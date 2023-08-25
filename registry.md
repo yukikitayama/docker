@@ -2,6 +2,36 @@
 
 Docker Trusted Registry allows deleting images if the image has not been signed.
 
+`docker container run -d -p 5000:5000 --name registry registry`
+
+`docker tag <image-name> 127.0.0.1:500/<image-name>`
+
+`docker push 127.0.0.1:5000/<image-name>`
+
+`docker pull 127.0.0.1:5000/<image-name>`
+
+## Provider
+
+- Docker Hub
+- Docker Enterprise Edition Docker Trusted Registry (DTR)
+- Docker Registry
+- AWS ECR
+- Google Cloud Artifact Registry
+
+## Swarm
+
+Because of Routing Mesh, all nodes can see `127.0.0.1:5000`
+
+All nodes must be able to access images
+
+`docker service create --name registry --publish 5000:5000 registry`
+
+`docker tag <image-name> 127.0.0.1:5000/<image-name>`
+
+`docker push 127.0.0.1:5000/<image-name>`
+
+`docker service create --name <service-name> 127.0.0.1:5000/<image-name>`
+
 ## Docker Hub
 
 Most popular public image registry
