@@ -39,6 +39,12 @@ To enable Docker Security Scan process,
 
 ## Docker Content Trust (DCT)
 
+Docker Content Trust allows you to verify the authenticity, integrity, and publication date of Docker images that are
+made available on the Docker Hub Registry. By default, content trust is disabled, meaning Docker CLI client doesn't
+sign the image.
+
+Setting `export DOCKER_CONTENT_TRUST=1` environment variable enables content trust.
+
 Digital signatures for data sent to and received from remote Docker registries allow client-side or runtime verification
 of the integrity and publisher of specific image tags.
 
@@ -80,6 +86,8 @@ https://www.redhat.com/en/blog/secure-your-containers-one-weird-trick
 
 ## Universal Control Plane (UCP)
 
+The purpose of UCP is to provide an integrated application management platform
+
 UCP has **role-based access control (RBAC)** to control who can access and make changes to cluster/applications. In UCP,
 you can create users and teams, define roles and resource sets of Swarm/Kubernetes and grant them.
 
@@ -94,6 +102,11 @@ Roles in UCP
 - Restricted Control
 - Scheduler
 - Full Control
+
+To sign images in a way that UCP trusts the images,
+- Configure Notary client
+- Initialize trust metadata for the repository
+- Delegate signing to the keys in your UCP client bundle
 
 ## docker trust
 

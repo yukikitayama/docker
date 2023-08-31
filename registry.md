@@ -64,3 +64,11 @@ Blobs can include layers and manifests.
 
 Garbage collection removes unreferenced image layers from DTR's backend storage.
 
+## Endpoint
+
+DTR endpoint to assess the health of DTR
+- `/health` is useful for load balancing or other automated health check tasks
+- `/nginx_status` returns number of connections to DTR frontend NGINX
+- `/api/v0/meta/cluster_status` returns DTP replicas information
+- `/load_balancer_status` is useful for an administrator to gauge the status of DTR replica
+

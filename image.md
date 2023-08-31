@@ -23,7 +23,9 @@ This saves storage space on host and transfer time on push and pull.
 
 Container is a single read and write layer on top of image
 
-`docker image history` and `docker image inspect` can show the information.
+`docker image inspect` can show the information.
+
+`docker image history` can display the layers of a docker image.
 
 ## Image tag
 
@@ -172,6 +174,8 @@ to transfer the entire contents of your hard drive to the Docker daemon.
 **Multi-stage build** uses multiple `FROM`s, each `FROM` can use a different base, each begins new stage of build, 
 copy artifacts from one stage to another, and leave behind anything no need in the final image.
 
+The build by `docker build` is run by **Docker daemon**, not by CLI or docker engine.
+
 ## Dangling
 
 Untagged images are called dangling images, and are not referenced by any container
@@ -179,6 +183,12 @@ Untagged images are called dangling images, and are not referenced by any contai
 `docker images --filter "dangling=true"` shows untagged images
 
 `docker image prune` removes dangling images.
+
+## Clean up
+
+`docker image rm` removes one or more images
+
+`docker image prune` remove all the unused images.
 
 ## Sign
 
@@ -194,6 +204,8 @@ DCT, Docker Content Trust.
 DCT allows you to verify the authenticity, integrity and publication date of Docker images in Docker Hub Registry.
 By default, content trust is disabled, but `export DOCKER_CONTENT_TRUST=1` enables it.
 
+DTR only allows deleting images if the image has not been signed.
+
 ## Alpine
 
 Alpine is distribution of Linux, very very small.
@@ -208,3 +220,5 @@ drive.
 
 `docker search --filter is-official=true --filter stars=30 ubuntu` means to search for a Ubuntu official Docker image
 with a minimum rating of 30 stars.
+
+`docker images --filter "dangling=true"` finds untagged images.

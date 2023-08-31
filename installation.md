@@ -57,6 +57,8 @@ The recommended way to install Docker engine on a production server is to instal
 
 ## Logging driver
 
+The logging mechanisms that Docker helps us get information from running containers and services.
+
 Configure logging driver in `daemon.json`. Set log-driver option in `daemon.json` to configure the default logging
 for containers.
 
