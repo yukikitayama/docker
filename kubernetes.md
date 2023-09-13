@@ -49,6 +49,64 @@ creates the container inside it.
 
 `kubectl get all` sees all objects
 
+`kubectl run [OPTIONS] -- [COMMAND] [args...]`, this `--` double-dash separates the kubectl CLI options and allows us
+to overwrite the Dockerfile CMD with a new command and arguments/options. You can also use `--command` instead of `--`,
+but double-dash method is used in many Linux shells and doesn't require us to quote the whole command we want to overwrite .
+
+`kubectl api-resources` lists all the resource names and their short names.
+
+`kubectl logs <pod-name>` shows standard output of a container
+
+## Imperative vs. declarative
+
+People wanna know how we are supposed to be using it, what's the best way, but that's hard, because it depends on what you
+want out of it.
+
+Imperative
+- Focus on how a program operates
+- `kubectl run`, `kubectl create deployment`, `kubectl update`
+- Imperative is easier when you know the state and at CLI, but not easy to automate
+
+Declarative
+- Focus on what a program should accomplish
+- `kubectl apply -f my-resources.yaml`
+- We don't know current state, but we only the end result
+- Resources can be many
+- Requires YAML
+- Easy to automate
+
+## kubectl apply configuration YAML
+
+Declarative objects approach by `kubectl apply -f filename.yaml`
+
+create/update resources in a file `kubectl apply -f myfile.yaml`
+
+create/update a whole directory of yaml `kubectl apply -f myyaml/`
+
+create/update from a URL `kubectl apply -f https://bret.run/pod.yaml`
+
+`apiVerion:` API version for a kind
+- `kuebctl api-versions`
+- First we need to know `apiVerion` and `kind`
+
+`kind:`
+- `kubectl api-resources` gets a list of resources
+- Some resources have multiple API's such as `deployments`
+
+`metadata:`
+- Only name is required
+
+`spec:`
+- All the actions
+
+Use `---` to have multiple manifests in one YAML such as creating service and deployment together
+
+`kubectl explain <kind-resource-name> --recursive` gives quick list of all the keys each `kind:` supports
+
+`kubectl explain <kind-resource-name>.spec` drill down one key
+
+`kubectl explain <kind-resource-name>.<key>.<further-key>`
+
 ## Pod
 
 Smallest object that we can create in Kubernetes. Basic unit of deployment. Containers are always in pods
@@ -80,6 +138,8 @@ If there's a pod definition file, edit it and use it to create a new pod
 If there's not a pod definition file, extract the definition file by `kubectl get pod <pod-name> -o yaml > pod-definition.yaml`
 
 Use `kubectl edit pod <pod-name>` to edit pod properties.
+
+Use `kubectl replace --force -f <definition-file.yaml>` to update pod
 
 ## Deployment
 
@@ -148,13 +208,68 @@ spec:
 
 ## Service
 
-Network endpoint to connect to a pod
+Service in Kubernetes is a stable address (network endpoint) to connect to a pod.
+
+When you create a pod in Kubernetes, it won't automatically connect a pod to the external things. 
+
+Service name we create becomes a part of DNS name
+
+4 different types of services
+- ClusterIP
+  - For connection within cluster
+  - default internal virtual IP
+  - ClusterIP is cluster internal only, so we cannot `curl` it.
+- NodePort
+  - For connection outside cluster
+  - Through IP addresses
+  - Need to use high port number allocated on each node
+  - Anyone can connect
+  - You don't have to jump into a pod, but you can access by `curl` for example to test things.
+- LoadBalancer
+  - Mostly used in cloud
+  - Controls a load balancer endpoint external to cluster
+  - Creates NodePort + ClusterIP services, essentially automation
+- ExternalName
+  - Stuff in the cluster need to connect to outside cluster
+  - Used less often
+  - Adds CNAME DNS record to CoreDNS
+
+Use `kubectl expose`
+
+## DNS
+
+Internal DNS is provided by **CoreDNS**
+
+DNS-based service discovery, using hostnames to access Services
+
+Only works for Services in the same Namespace
 
 ## Namespace
 
 Filtered group of objects in cluster
 
 No security feature in Kubernetes. Different from namespace security feature of Docker.
+
+`Default` namespace is automatically created, when the number of applications we work with is small, we can stay in
+default namespace.
+
+`kube-system` internal purposes things isolated from a user to prevent overwrite
+
+`kube-public` resources available to users
+
+Going to enterprise, we can create different namespaces such as Dev, and Prod.
+
+We can assign resource limits to each namespace
+
+To DNS over different namespaces, `<service-name>.<namespace-name>.svc.cluster.local`
+
+`kubectl get pods` list pods in `Default` namespace.
+
+To list pods in a different namespace, `kubectl get pods --namespace=<namespace-name>`, or `-n`
+
+To switch namespace to avoid using `--namespace` option all the time, `kubectl config set-context $(kubectl config current-context) --namespace=dev`
+
+`kubectl get pods --all-namespaces` to list all namespaces, or `-A`
 
 ## Node
 
@@ -163,6 +278,12 @@ A cluster can have multiple nodes
 # Cluster
 
 A group of nodes
+
+## Generators
+
+`--dry-run=client -o yaml` outputs templates, and use those YAML defaults as a starting point.
+
+Generators are opinionated defaults
 
 ## YAML
 
@@ -175,6 +296,48 @@ Required fields
 - spec
   - `containers` is list/array
     - It has `name` and `image`
+
+## Dry run
+
+## Label
+
+Under `metadata:`. Meant to describe resource
+
+`key: value` to identify resource, for example `env: prod`, `app: api`, `tier: frontend`
+
+Use `-l key=value`
+
+## Label selector
+
+Links resource dependencies `selector:  app: <name>`, `selector:  matchLabels:  app: <name>`
+
+Match up Services and Deployments
+
+User labels and selectors to control which pods go to which nodes
+
+Avoid **Taints** and **Tolerations** until you get advanced.
+
+## StatefulSets
+
+Resource type designed to run **database**
+
+But avoid stateful workloads for first few deployments until you are good at the basics
+
+Stateless is the basic approach for Docker, Swarm and Kubernetes.
+
+Use **db-as-a-service** whenever you can.
+
+## Volume
+
+- Volumes
+  - Tied to lifecycle of a Pod
+  - All containers in a single Pod can share
+- PersistentVolumes
+  - Created at the cluster level, outlives a Pod
+  - Separate storage config from Pod
+  - Multiple Pods can share
+
+Container Storage Interface (CSI) plugins are the better and new way to connect to storage
 
 ## Service
 
@@ -282,4 +445,109 @@ satisfied. Claims will be bound as matching volumes become available.
   - Allow services to be accessed from outside the cluster
 - LoadBalancer
   - Allow services to be accessed from outside the cluster
+
+## Ingress
+
+OSI Layer 7 (HTTP)
+
+Route outside connections
+
+## Helm
+
+Higher deployment abstractions to extend Kubernetes API.
+
+## Web GUI
+
+https://github.com/kubernetes/dashboard
+
+Many cloud vendors don't have GUI by default
+
+## Future of Kubernetes
+
+We need to make infrastructure boring as much as possible, so we rely on more the things we do on top of that.
+
+**Knative** is serverless workloads on Kubernetes
+
+**Service mesh** new layer in distributed app traffic for better control, security and monitoring
+
+## Resource requirement
+
+`1K` is `1 Kilobyte` = `1,000 bytes`
+
+`1Ki` is `1 Kibibyte` = `1,024 bytes`
+
+## Taint and tolerance
+
+Taint is bug spray for node. Tolerance of bug property to overcome taint for pod.
+
+Trait is for node, tolerance is for pod.
+
+Trait and tolerance doesn't guarantee which node to place a pod.
+
+What happens to a pod when the pod doesn't tolerate taint of a node
+- NoSchedule
+- PreferNoSchedule
+- NoExecute
+
+**Master node** has a taint by default to avoid running something
+
+## Multi-container pod
+
+- Sidecar
+  - e.g. Logging agent alongside a web server to send logs to a central log server
+- Adapter
+  - e.g. A container exists between multiple containers and one central server
+- Ambassador
+  - e.g. A container for the application container to proxy to right one out of multiple servers
+
+## Readiness probe
+
+Check the application inside pod is ready, not if a pod or container is ready.
+
+Readiness probe is useful,
+- If your container needs to work on loading large data during startup.
+- If you want your container to be able to take itself down for maintenance.
+- If you want to start sending traffic to a pod only when a probe succeeds.
+
+Even if pod or container can quickly get ready, the actual application inside may take longer time to complete all the 
+setups.
+
+Use `readinessProbe` in pod definition file and use `httpGet`, `tcpSocket`, `exec`
+
+Use `initialDelaySeconds`, `periodSeconds`.
+
+POD state
+1. Pending
+2. ContainerCreating
+3. Running
+
+POD conditions
+- PodScheduled
+- Initialized
+- ContainersReady (when multiple containers pod)
+- Ready (Pod is ready)
+
+## Liveness probe
+
+Livenss probe can be configured on containers to periodically test whether the application within the container is healthy.
+
+If the test fails, the container is destroyed and recreated.
+
+Developers need to define what it means for application to be healthy.
+
+Check whether the container is healthy, not about being ready.
+
+Use `livenessProbe` in `containers` in pod definition file.
+
+## Monitoring
+
+Heapster is deprecated
+
+**Metrics Server** is now, in-memory solution, collects metrics from nodes and pods, doesn't store metrics in disks.
+
+`kubectl top node` and `kubectl top pod` show list of CPU and memory
+
+## Job
+
+A batch task running inside a pod. When a job runs multple in sequence or in parallel, multiple pods will be created.
 

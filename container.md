@@ -21,6 +21,16 @@ Typically Docker containers are not built to accept additional parameters when l
 
 `docker run -p <host-port>:<container-port>` to make a port available to services outside of Docker
 
+`docker system events` allows us to interactively monitor all container activity in the Docker engine.
+
+`docker inspect <container-name>` shows the current logging driver of a running container
+
+## Log
+
+`docker container logs <container-name>`
+
+`docker logs <container-name>`
+
 ## Namespace
 
 Namespace provides isolation for running processes.
@@ -66,3 +76,19 @@ Docker Engine combines the followings into a wrapper called container format.
 ## DNS
 
 `docker container create --dns=<ip-address>` to create a container with custom DNS server.
+
+## Restart
+
+`docker run --restart <option-name>` configures the restart policy for a container. Options are
+- `no` - Default, not automatically restart
+- `on-failure` - Restart if it exits due to an error
+- `always` - Always restart
+- `unless-stopped` - Always restart except when container is manually stopped
+
+## Live restore
+
+With **live restore**, we can configure the daemon so that containers remain running if the daemon becomes unavailable.
+
+The live restore option helps reduce container downtime due to daemon crashes, planned outages, or upgrades.
+
+

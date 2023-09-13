@@ -37,6 +37,18 @@ idea.
 
 `10.0.0.0/8` is a default address pool that Docker Swarm uses by default for global scope networks.
 
+Order of steps taken when creating a service process in swarm mode. `AO Ads` to remember
+- API
+  - Creates service objects
+- Orchestrator
+  - Manage states of tasks
+- Allocator
+  - Allocates IP address to a task
+- Dispatcher
+  - Determines on which node a task will be scheduled
+- Scheduler
+  - Instructs a worker node to run a task
+
 ## Networking
 
 **Overlay** is the swarm-wide bridge network driver where containers can communicate across nodes.
@@ -63,9 +75,9 @@ Each service can be connected to multiple networks.
 
 There is no limit on the number of manager nodes.
 
-Adding manager nodes to a swarm makes the swarm more fault-tolerant.
+Adding manager nodes to a swarm makes the swarm more **fault-tolerant**.
 
-Additional manager nodes reduce the write performance, because more nodes must acknowledge proposals to update the swarm
+Additional manager nodes reduce the write **performance**, because more nodes must acknowledge proposals to update the swarm
 state.
 
 Run `docker swarm join-token worker` on a manager node, to retrieve the join token for worker nodes
@@ -73,6 +85,20 @@ Run `docker swarm join-token worker` on a manager node, to retrieve the join tok
 ## Worker
 
 Run `docker swarm join --token <token>` on a worker node to add a worker to the swarm
+
+## Task
+
+A unit of services in Swarm
+
+A task advance through a number of states until they complete or fail.
+
+`NEW` state si the state where a task is initialized.
+
+Task only progresses forward states, and doesn't go backward.
+
+## Node
+
+Node is an instance of the **Docker engine** participating in the swarm, as a Docker node.
 
 ## Dispatcher
 
@@ -98,10 +124,12 @@ Raft requires a majority or quorum of `(N / 2) + 1`. For example, when we have a
 
 ## Service placement
 
-**Placement constraints** limit the nodes a service can run on.
+**Placement constraints** limit the nodes a service can run on. 
+Configure service to run only on nodes with specific **metadata**.
+`docker service update --constraints-add`
 
-**Placement preference** try to place tasks on appropriate nodes in algorithmic way. `docker service update --placement-pref-add
-`
+**Placement preference** try to place tasks on appropriate nodes in algorithmic way. 
+`docker service update --placement-pref-add`
 
 ## Service update
 
@@ -137,6 +165,8 @@ Service updates wait for them before continuing
 
 Swarm mode has 2 types of services; replicated and global. Control by `--mode`. Default is replicated service
 
+A number of tasks can be specified for a replicated service, but there's no pre-specified number of tasks for global service.
+
 For a replicated service, 
 - we can specify the number of replica tasks for the swarm manager to schedule onto available nodes.
 - `docker service scale` command can be used to scale up or down to the desired number of replicas.
@@ -154,6 +184,9 @@ Prevents a node from receiving new tasks from the swarm manager.
 Making a manager node drain means it only performs swarm management tasks, not for task assignment
 
 Making a node drain means we take it down for maintenance.
+
+Setting a node to `DRAIN` doesn't remove standalone containers from the node, because drain affects the node's ability
+to schedule swarm service workloads.
 
 ## Pending
 
@@ -255,4 +288,13 @@ network
 ## Security
 
 `docker swarm init --external-ca` specifies your own externally-generated root CA
+
+## Rolling update
+
+`docker service update --update-delay 30s` sets 30 seconds delay between tasks so that rolling restart happens gradually.
+
+## Rollback
+
+`docker service update --rollback <service-name>` or `docker service rollback <service-name>` to rollback a service to
+its previous version
 

@@ -32,6 +32,8 @@ When you connect to UCP, the hostname that you use to connect needs to be recogn
 
 Use `--san` Subject Alternative Name (SAN) if you want to use the self-signed certificate when you install UCP.
 
+Use `https://<ucp-manager-url>/_ping` as endpoint to check the health of a single UCP manager node
+
 ## Docker daemon
 
 Set configuration options in `/etc/docker/daemon.json` to configure daemon flags and environment variables for Docker
