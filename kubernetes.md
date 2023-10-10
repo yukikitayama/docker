@@ -162,6 +162,8 @@ To scale up, `kubectl scale deploy <deployment-name> --replicas <number>`
 
 `kubectl describe deploy <deployment-name>`
 
+`kubectl rollout undo deployment <deployment-name>` undoes the update and go back to the previous 
+
 ## Controller
 
 Create and update pods and other objects
@@ -319,7 +321,9 @@ Avoid **Taints** and **Tolerations** until you get advanced.
 
 ## StatefulSets
 
-Resource type designed to run **database**
+Resource type designed to run **database**. Read can be from any pods, but write needs to be to master pod only.
+
+When you create stateful set, it deploys one pod at a time, gets an ordinal index, and each hold has a stable unique name.
 
 But avoid stateful workloads for first few deployments until you are good at the basics
 
@@ -338,6 +342,18 @@ Use **db-as-a-service** whenever you can.
   - Multiple Pods can share
 
 Container Storage Interface (CSI) plugins are the better and new way to connect to storage
+
+## Persistent Volume
+
+Persistent volume is a way to manage storage centrally, administrator creates a large pool of storage, and a user gets 
+a piece from it. Persistent volume is a cluster-wide pool of volumes configured by administrator, and users use **persistent
+volume claim** to select storage from the pool.
+
+## Storage class
+
+Storage class allows us to make dynamic provisioning of persistent volume in cloud
+
+`kind: StorageClass`
 
 ## Service
 
