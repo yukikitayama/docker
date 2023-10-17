@@ -192,7 +192,7 @@ spec:
     <key-in-node>: <value-of-the-key>
 ```
 
-## Node affinity
+### Node affinity
 
 `kubectl edit deployment <deployment-name>`
 
@@ -213,6 +213,68 @@ spec:
             - ssd     
 ```
 
+### Readiness probe
+
+```yaml
+spec:
+  containers:
+    - name:
+      image:
+      readinessProbe:
+        httpGet:
+          path:
+          port:
+```
+
+### Liveness probe
+
+```yaml
+spec:
+  containers:
+    - livenessProbe:
+        httpGet:
+          path:
+          port:
+        periodSeconds:
+        initialDelaySeconds:
+```
+
+### Label
+
+```yaml
+metadata:
+  labels:
+    <key1>: <value1>
+    <key2>: <value2>
+```
+
+ReplicaSet. `label-to-connect-replicaset-to-pod` and `label-configured-on-pod` need to match
+
+```yaml
+metadata:
+  labels:
+    <label-configured-on-replicaset>: <value>
+spec:
+  selector:
+    matchLabels:
+      <label-to-connect-replicaset-to-pod>: <value>
+  template:
+    metadata:
+      labels:
+        <label-configured-on-pod>: <value>
+    spec:
+```
+
+### Annotation
+
+Memo
+
+```yaml
+metadata:
+  annotations:
+    <key>: <value>
+```
+
 ## CLI
 
 `kubectl run <pod-name> --image=<image=name> --dry-run=client -o yaml > <file-name>.yaml`
@@ -222,6 +284,8 @@ spec:
 `kubectl describe <object-type> <object-name>`
 
 `kubectl get pods -o wide` shows node
+
+`kubectl get all` lists all objects.
 
 `--force` in `kubect delete pod <pod-name> --force` fastens the process
 
@@ -249,15 +313,24 @@ Use `--labels="key=value"` or `-l="key=value"` to set a label
 
 To use service account token in REST API call, `curl https://<endpoint> -insecure --header "Authorization: Bearer <token>`
 
+`<kubectl-command-to-list-something> --no-headers | wc -l` to count the list items. `wc` is word count
+
 ### Debugging
 
 `kubectl describe pod <pod-name>`
 
 `kubectl explain <object-type>` e.g. `kubectl explain replicaset` shortens `kubectl`
 
-`kubectl logs <pod-name>` inspects logs
+`kubectl logs <pod-name>` inspects logs. `kubectl logs -f <pod-name>` shows logs in live by `-f`. If a pod is a multi-containers
+pod, specify container name by `kubectl logs -f <pod-name> <container-name>`.
 
 `kubectl exec -it <pod-name> -- <linux-command-for-debugging>`
+
+### Resource usage
+
+`kubectl top node` shows CPU and memory usage by node
+
+`kubectl top pod` shows CPU and memory usage by pod
 
 ### Update
 
@@ -332,3 +405,12 @@ To remove a taint, add `-` at the end. For example, `kubectl taint node controlp
 ### Label
 
 `kubectl label nodes <node-name> <key>=<value>`
+
+### Selector
+
+Use label key and value in `metadata: labels: <key>: <value>`
+
+`kubectl get pods --selector <label-key>=<label-value>`
+
+With multiple selectors, separate by commas `kubectl get pods --selector <key1>=<value1>,<key2>=<value2>,<key3>=<value3>`
+
