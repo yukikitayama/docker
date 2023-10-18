@@ -275,6 +275,58 @@ metadata:
     <key>: <value>
 ```
 
+### Rolling update
+
+Deployment YAML. Change rolling update to Recreate. `kubectl edit deployment <deployment-name>`
+
+```yaml
+spec:
+  strategy:
+    type: Recreate
+```
+
+### Restart policy
+
+```yaml
+spec:
+  containers:
+  restartPolicy: Never
+```
+
+### Job
+
+`completions` runs a pod multiple times. 
+
+`backoffLimit` allow us to run multiple times until it succeeds.
+
+```yaml
+apiVersion: batch/v1
+kind: Job
+metadata:
+spec:
+  completions: 3
+  parallelism: 3
+  backoffLimit: 30
+  template:
+    spec:
+      containers:
+```
+
+### Cron job
+
+```yaml
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+spec:
+  schedule: "* * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+```
+
 ## CLI
 
 `kubectl run <pod-name> --image=<image=name> --dry-run=client -o yaml > <file-name>.yaml`
@@ -337,6 +389,10 @@ pod, specify container name by `kubectl logs -f <pod-name> <container-name>`.
 `kubectl edit rs <replicaset-name>` won't replace old pods with new pods, so we need to delete old pods manually
 
 `kubectl replace --force -f <definition-file.yaml>`
+
+### Delete resources
+
+`kubectl delete -f <definition.yaml>`
 
 ### Pod
 
@@ -414,3 +470,12 @@ Use label key and value in `metadata: labels: <key>: <value>`
 
 With multiple selectors, separate by commas `kubectl get pods --selector <key1>=<value1>,<key2>=<value2>,<key3>=<value3>`
 
+### Rollout
+
+To update image `kubectl set image deployment <deployment-name> <container-name-in-the-deployment>=<new-image>`
+
+`kubectl rollout status deployment <deployment-name>` shows status
+
+`kubectl rollout history deployment <deployment-name>` show version history.
+
+Rollback `kubectl rollout undo <deployment-name>`
