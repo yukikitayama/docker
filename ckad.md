@@ -327,6 +327,93 @@ spec:
           containers:
 ```
 
+### Service
+
+`NodePort` is a service for external users to access a pod
+
+`targetPort` is a port of a pod between pod and service. 
+
+`port` is a port of a service between pod and service. 
+
+`nodePort` is a port of a node between external users and service.
+
+`selector` chooses a pod. Pod uses `metadata: labels:` for this.
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name:
+spec:
+  type: NodePort
+  ports:
+    - targetPort:
+      port:
+      nodePort:
+  selector:
+    <key1-of-pod>: <value1>
+```
+
+```yaml
+kind: Pod
+metadata:
+  <key1-of-pod>: <value1>
+```
+
+`ClusterIP` is a service for pods to communicate each other
+
+### Persistent volume
+
+```yaml
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv-log
+spec:
+  capacity:
+    storage: 100Mi
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  hostPath:
+    path: /pv/log
+```
+
+### Persistent volume claim
+
+To use persistent volume claim in a pod
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mypod
+spec:
+  containers:
+    - name: myfrontend
+      image: nginx
+      volumeMounts:
+      - mountPath: "/var/www/html"
+        name: mypd
+  volumes:
+    - name: mypd
+      persistentVolumeClaim:
+        claimName: myclaim
+```
+
+```yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: claim-log-1
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 50Mi
+```
+
 ## CLI
 
 `kubectl run <pod-name> --image=<image=name> --dry-run=client -o yaml > <file-name>.yaml`
@@ -351,6 +438,12 @@ Use `--all-namespaces` or `-A` if objects spans across different namespaces.
 
 Use `--labels="key=value"` or `-l="key=value"` to set a label
 
+`kubectl get <resource-name> -A`, `-A` allows us to see objects in all the namespaces
+
+To see the files in a pod, `kubectl exec <pod-name> -- cat /path/filename`
+
+`kubectl config view` shows users
+
 ### Linux
 
 `cat <file-name>` to see the text contents of the file
@@ -365,7 +458,12 @@ Use `--labels="key=value"` or `-l="key=value"` to set a label
 
 To use service account token in REST API call, `curl https://<endpoint> -insecure --header "Authorization: Bearer <token>`
 
-`<kubectl-command-to-list-something> --no-headers | wc -l` to count the list items. `wc` is word count
+`<kubectl-command-to-list-something> --no-headers | wc -l` to count the list items. `wc` is word count. `-l` prints the
+number of lines in a file.
+
+To check API version, `curl https://<master-node-address>:6443/version`
+
+`cat /etc/kubernetes/manifests/kube-apiserver.yaml` shows kube API server.
 
 ### Debugging
 
@@ -435,6 +533,8 @@ Create a service named `redis-service` of type ClusterIP to expose pod `redis` o
 
 `kubectl create secret generic <secret-name> --from-literal=key=value`
 
+Create TLS secret `kubectl create secret tls <secret-name> --cert "<cert-path>" --key "<key-path>"`
+
 Don't forget `generic`
 
 ### Service account
@@ -479,3 +579,52 @@ To update image `kubectl set image deployment <deployment-name> <container-name-
 `kubectl rollout history deployment <deployment-name>` show version history.
 
 Rollback `kubectl rollout undo <deployment-name>`
+
+### Ingress
+
+`kubectl create ingress ingress-pay -n critical-space --rule="/pay=pay-service:8282"`
+
+### Config
+
+`kubectl config view` shows current configuration
+
+To change current context, `kubectl config use-context <context-name> --kubeconfig <path-to-context-file>`
+
+To make a new config file be the default config, `mv <path-to-new-config-file> </root/.kube/config>`
+
+`kubectl config -h` lists
+
+### Admission controller
+
+`kubectl get pods -n kube-system`
+
+`kubectl exec -it kube-apiserver-controlplane -n kube-system -- kube-apiserver -h | grep 'enable-admission-plugins'`
+
+`vi /etc/kubernetes/minifests/kube-apiserver.yaml` or `grep enable-admission-plugins /etc/kubernetes/manifests/kube-apiserver.yaml`
+
+### API version
+
+To see preferred version of `authorization.k8s.io` API group, `kubectl proxy 8001&` and `curl localhost:8001/apis/authorization.k8s.io`
+
+To enable API versions, `cp /etc/kubernetes/manifests/kube-apiserver.yaml /root/kube-apiserver.yaml` for backup, and modify the original file.
+
+### Helm
+
+`helm search hub <helm-chart-repo-name>` search helm chart repo
+
+`helm repo add <name-in-my-resource> <chart-repo-url>` add a helm chart repo.
+
+`helm search repo <package-name>` searches a package from the added repo
+
+`helm repo list` lists the repos in the node
+
+`helm install <release-name> <chart-name>` install a helm chart from a repo
+
+`helm install <release-name> .` installs from the downloaded package if you are inside a package directory with `values.yaml`
+
+`helm list` lists the installed package
+
+`helm uninstall <release-name>`
+
+`hell pull --untar <package-name>` downloads a package but not install
+
